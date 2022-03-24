@@ -1,0 +1,28 @@
+{
+  "name": "webshop",
+  "version": "1.0.0",
+  "description": "webshop",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon -r dotenv/config server.js",
+    "auth": "nodemon -r dotenv/config auth/auth.js"
+  },
+  "author": "nezzar064",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "joi": "^17.6.0",
+    "jshint": "^2.13.4",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.2.8",
+    "nodemailer": "^6.7.3",
+    "nodemon": "^2.0.15",
+    "sequelize": "^6.17.0",
+    "uuid": "^8.3.2",
+    "winston": "^3.6.0"
+  }
+}
