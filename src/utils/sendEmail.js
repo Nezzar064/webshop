@@ -18,7 +18,7 @@ const sendEmail = async (email, subject, html) => {
     });
 
     // Send the email
-    logger.info(`${moduleName} PW Recovery email sent to ${email}`);
+    logger.info(`${moduleName} subject: ${subject} email sent to ${email}`);
     await transporter.sendMail({
         from: process.env.MAIL_USER,
         to: email,
@@ -26,7 +26,7 @@ const sendEmail = async (email, subject, html) => {
         html: html
     })
     .catch((err) => {
-        logger.error(`${moduleName} PW Recovery email unexpected error ${JSON.stringify(err)}`);
+        logger.error(`${moduleName} subject: ${subject} email unexpected error ${JSON.stringify(err)}`);
     });
 };
 
