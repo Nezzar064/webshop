@@ -14,7 +14,8 @@ exports.pwResetEmailGen = async (req, res) => {
         // Send status 400 if req.body is empty
         if (!req.body) {
             logger.error(`${moduleName} invalid/no email supplied`);
-            return res.status(400).send({message: 'Invalid/no email supplied'});
+            res.status(400).send({message: 'Invalid/no email supplied'});
+            return;
         }
 
         // Find user, if no user exists, return message and status 400
@@ -22,7 +23,8 @@ exports.pwResetEmailGen = async (req, res) => {
         .then(user => {
             if (!user) {
                 logger.error(`${moduleName} no match for user/email error ${JSON.stringify(req.body)}`);
-                return res.status(400).send({message: 'No user exists with given email'});
+                res.status(400).send({message: 'No user exists with given email'});
+                return;
             }
             return user;
         });
@@ -58,13 +60,13 @@ exports.pwResetEmailGen = async (req, res) => {
         res.status(200).send('Password reset link successfully sent to your email account.');
     } catch (err) {
         logger.error(`${moduleName} send password reset link unexpected error ${JSON.stringify(err)}`);
-        return res.status(500).send({message: 'Internal Error'});
+        return res.status(500).end();
     }
 };
 
 exports.pwReset = async (req, res) => {
     try {
-        logger.info(`${moduleName} request to reset password: ${JSON.stringify(req.body)}`);
+        logger.info(`${moduleName} request to reset password for userId: ${JSON.stringify(req.params.id)}`);
 
         // Send status 400 if req.body is empty
         if (!req.body) {
@@ -75,7 +77,9 @@ exports.pwReset = async (req, res) => {
         const user = await User.findById(req.params.id)
         .then((user) => {
             if (!user) {
-                return res.status(400).send({message: 'No user matches id'});
+                logger.error(`${moduleName} password reset user id not valid ${JSON.stringify(req.params.id)}`);
+                res.status(400).send({message: 'No user matches id'});
+                return;
             }
             return user;
         });
@@ -87,7 +91,9 @@ exports.pwReset = async (req, res) => {
         })
         .then((token) => {
             if (!token) {
-                return res.status(400).send({message: 'Invalid link or token expired'});
+                logger.error(`${moduleName} password reset token not valid ${JSON.stringify(req.params.token)}`);
+                res.status(400).send({message: 'Invalid link or token expired'});
+                return;
             }
             return token;
         });
@@ -97,10 +103,11 @@ exports.pwReset = async (req, res) => {
         await user.save();
         await token.delete();
         
+        logger.info(`${moduleName} password reset completed for userId: ${JSON.stringify(req.params.id)}`);
         res.status(200).send('Password successfully reset');
     } catch (err) {
-        logger.error(`${moduleName} password reset unexpected error ${JSON.stringify(err)}`);
-        return res.status(500).send({message: 'Internal Error'});
+        logger.error(`${moduleName} send password reset link unexpected error ${JSON.stringify(err)}`);
+        return res.status(500).end();
     }
 };
 

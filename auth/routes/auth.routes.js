@@ -1,5 +1,8 @@
 const signupVerification = require('../middlewares/signupVerification');
+const verifySignIn = require('../middlewares/verifySignIn');
 const controller = require('../controllers/auth.controller');
+const pwController = require('../controllers/password.controller');
+const router = require('express').Router();
 
 module.exports = (app) => {
     app.use((req, res, next) => {
@@ -10,7 +13,7 @@ module.exports = (app) => {
         next();
     });
 
-    app.post('/signup',
+    router.post('/sign-up',
     [
         signupVerification.signupValidator,
         signupVerification.checkIfRolesExist
@@ -18,7 +21,12 @@ module.exports = (app) => {
     controller.signUp
     );
 
-    app.post('/signin', controller.signIn);
+    router.post('/pw-reset', pwController.pwResetEmailGen);
+    router.post('/pw-reset/:id/:token', pwController.pwReset);
 
-    app.post('/refresh-token', controller.refreshToken);
+    router.post('/sign-in', verifySignIn, controller.signIn);
+
+    router.post('/refresh-token', controller.refreshToken);
+
+    app.use('/api/auth', router);
 };

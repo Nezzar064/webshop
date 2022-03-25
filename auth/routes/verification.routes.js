@@ -1,6 +1,7 @@
 const guards = require('../middlewares/guards');
 const controller = require('../controllers/verification.controller');
 const verifyToken = require('../middlewares/jwt');
+const router = require('express').Router();
 
 module.exports = (app) => {
     app.use((req, res, next) => {
@@ -11,9 +12,9 @@ module.exports = (app) => {
         next();
     });
 
-    app.post('/verification/verify-token', verifyToken, controller.verifyTokenWithNoGuard);
+    router.post('/token/verify', verifyToken, controller.verifyTokenWithNoGuard);
 
-    app.post('/verification/guards/admin-guard',
+    router.post('/guards/admin/verify',
     [
         guards.verifyTokenWithGuard,
         guards.adminGuard
@@ -21,11 +22,13 @@ module.exports = (app) => {
     controller.verifyTokenWithAdminGuard
     );
 
-    app.post('/verification/guards/mod-guard',
+    router.post('/guards/mod/verify',
     [
         guards.verifyTokenWithGuard,
         guards.modGuard
     ],
     controller.verifyTokenWithModGuard
     );
+
+    app.use('/api/auth/verification', router);
 };

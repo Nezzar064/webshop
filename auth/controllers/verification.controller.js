@@ -7,6 +7,5 @@ exports.verifyTokenWithAdminGuard = (req, res) => {
 };
 
 exports.verifyTokenWithModGuard = (req, res) => {
-
     res.status(200).send({verified: true});
 };

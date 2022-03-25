@@ -7,9 +7,7 @@ const pwToken = mongoose.model(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-        token: {
-            type: String,
-        },
+        token: String,
         createdAt: {
             type: Date,
             default: Date.now,

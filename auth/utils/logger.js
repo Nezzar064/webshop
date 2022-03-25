@@ -7,10 +7,6 @@ const logger = winston.createLogger({
             format: winston.format.simple(),
             level: 'info'
         }),
-        new winston.transports.Console({
-          format: winston.format.simple(),
-          level: 'error'
-        }),
         /*
         new winston.transports.File({
           filename: 'auth/logs/auth.log',
