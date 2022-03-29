@@ -5,18 +5,15 @@ const logger = require('../utils/logger');
 
 const moduleName = 'verifySignIn.js -';
 
-signInValidator = (req, res, next) => {
+signInValidator = async (req, res, next) => {
     logger.info(`${moduleName} validate sign-in-request ${JSON.stringify(req.body)}`);
 
     //Check if username is valid
-    User.findOne({
+    await User.findOne({
         username: req.body.username
-    }).exec((err, user) => {
-        if (err) {
-            logger.error(`${moduleName} verify username error ${JSON.stringify(err)}`);
-            res.status(500).send({ message: err });
-            return;
-        }
+    })
+    .exec()
+    .then((user) => {
         if (!user) {
             logger.error(`${moduleName} verify username - username is invalid ${JSON.stringify(req.body.username)}`);
             res.status(400).send({ message: 'Invalid username!' });
@@ -34,6 +31,11 @@ signInValidator = (req, res, next) => {
 
         next();
 
+    })
+    .catch((err) => {
+        logger.error(`${moduleName} verify username error ${JSON.stringify(err)}`);
+        res.status(500).send({ message: err });
+        return;
     });
 };
 
