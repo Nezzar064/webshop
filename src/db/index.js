@@ -12,3 +12,19 @@ const sequelize = new Sequelize(process.env.PSQL_DB, process.env.PSQL_USER, proc
         idle: 10000
     }
 });
+
+const db = {};
+
+db.product = require('./models/product.model')(sequelize, Sequelize);
+db.order = require('./models/order.model')(sequelize, Sequelize);
+
+db.order.hasMany(db.product, {
+    as: 'products',
+});
+
+db.product.belongsTo(db.order, {
+    foreignKey: 'orderId',
+    as: 'products'
+});
+
+module.exports = db;

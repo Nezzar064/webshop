@@ -1,15 +1,21 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-//const db = require('./app/database/config');
+// const db = require('./src/db/index');
 
 
 const app = express();
 //db.sequelize.sync();
 
 let corsOptions = {
-    origin: 'http://localhost:8081'
+    origin: ''
 };
+
+if (process.env.RESOURCE_PORT) {
+    corsOptions.origin = 'http://localhost:3001';
+} else {
+    corsOptions.origin = 'http://localhost:8081';
+}
 
 /*
 db.sequelize.sync({ force: true }).then(() => {
@@ -28,5 +34,5 @@ app.use(express.urlencoded({extended: true}));
 // set port
 const PORT = process.env.RESOURCE_PORT || 8080;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}.`);
+    console.log(`Resource server running on port ${PORT}.`);
 });
