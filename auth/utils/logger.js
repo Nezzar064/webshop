@@ -12,12 +12,7 @@ const logger = winston.createLogger({
           filename: 'auth/logs/auth.log',
           format: winston.format.simple(),
           level: 'info'
-        }),
-        new winston.transports.File({
-          filename: 'auth/logs/auth.log',
-          format: winston.format.simple(),
-          level: 'error'
-      }),
+        })
       */
     ],
 });

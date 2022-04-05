@@ -16,6 +16,8 @@ if (process.env.AUTH_PORT) {
     corsOptions.origin = 'http://localhost:8083';
 }
 
+// IMPLEMENT RATE LIMITER PLEASE
+
 app.use(cors(corsOptions));
 
 // Content Types

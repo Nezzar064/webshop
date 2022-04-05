@@ -23,6 +23,8 @@ db.sequelize.sync({ force: true }).then(() => {
 });
 */
 
+// IMPLEMENT RATE LIMITER PLEASE
+
 
 app.use(cors(corsOptions));
 

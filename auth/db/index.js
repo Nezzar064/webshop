@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 const Role = require('./models/role.model');
-mongoose.Promise = global.Promise;
 
 const moduleName = 'db/index.js -';
 
@@ -29,8 +28,8 @@ const initial = (roles) => {
     });
 };
 
-const initDb = async () => {
-    await mongoose.connect(`mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`, {
+const initDb = () => {
+    mongoose.connect(`mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`, {
         useNewUrlParser: true,
         useUnifiedTopology: true
     })
