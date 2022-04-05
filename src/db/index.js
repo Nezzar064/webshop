@@ -17,14 +17,16 @@ const db = {};
 
 db.product = require('./models/product.model')(sequelize, Sequelize);
 db.order = require('./models/order.model')(sequelize, Sequelize);
+db.orderItem = require('./models/orderItem.model')(sequelize, Sequelize);
+
 
 db.order.hasMany(db.product, {
-    as: 'products',
+    as: 'orderItems',
 });
 
-db.product.belongsTo(db.order, {
+db.orderItem.belongsTo(db.order, {
     foreignKey: 'orderId',
-    as: 'products'
+    as: 'orderItems'
 });
 
 module.exports = db;

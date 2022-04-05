@@ -1,0 +1,1 @@
+//contact auth server here, use node-fetch. probably need getToken from auth server

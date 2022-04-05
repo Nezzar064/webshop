@@ -21,7 +21,6 @@
     "mongoose": "^6.2.8",
     "nodemailer": "^6.7.3",
     "nodemon": "^2.0.15",
-    "sequelize": "^6.17.0",
     "uuid": "^8.3.2",
     "winston": "^3.6.0"
   }
