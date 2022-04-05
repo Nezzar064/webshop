@@ -12,9 +12,9 @@ module.exports = (app) => {
         next();
     });
 
-    router.post('/token/verify', verifyToken, controller.verifyTokenWithNoGuard);
+    router.get('/token/verify', verifyToken, controller.verifyTokenWithNoGuard);
 
-    router.post('/guards/admin/verify',
+    router.get('/guards/admin/verify',
     [
         guards.verifyTokenWithGuard,
         guards.adminGuard
@@ -22,7 +22,7 @@ module.exports = (app) => {
     controller.verifyTokenWithAdminGuard
     );
 
-    router.post('/guards/mod/verify',
+    router.get('/guards/mod/verify',
     [
         guards.verifyTokenWithGuard,
         guards.modGuard
