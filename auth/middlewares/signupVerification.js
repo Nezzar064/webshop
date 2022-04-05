@@ -5,44 +5,31 @@ const logger = require('../utils/logger');
 const moduleName = 'signupVerification.js -';
 
 signupValidator = async (req, res, next) => {
-    logger.info(`${moduleName} validate signup-request/uname & email ${JSON.stringify(req.body)}`);
+    try {
+        logger.info(`${moduleName} validate signup-request/uname & email ${JSON.stringify(req.body)}`);
 
-    //Check if username is duplicated
-    await User.findOne({
-        username: req.body.username
-    })
-        .exec()
-        .then(async (user) => {
-            if (user) {
-                logger.error(`${moduleName} verify username - username already in use ${JSON.stringify(user.username)}`);
-                res.status(400).send({ message: 'Username already in use!' });
-                return;
-            }
-
-            //Check if email is duplicated
-            await User.findOne({
-                email: req.body.email
-            })
-                .exec()
-                .then((user) => {
-                    if (user) {
-                        logger.error(`${moduleName} verify email - email already in use ${JSON.stringify(user.email)}`);
-                        res.status(400).send({ message: 'Email already in use!' });
-                        return;
-                    }
-                    next();
-                })
-                .catch((err) => {
-                    logger.error(`${moduleName} verify email error ${JSON.stringify(err)}`);
-                    res.status(500).send({ message: err });
-                    return;
-                });
-        })
-        .catch((err) => {
-            logger.error(`${moduleName} verify username error ${JSON.stringify(err)}`);
-            res.status(500).send({ message: err });
+        //Check if username is duplicated
+        const userByUsername = await User.findOne({ username: req.body.username }).exec();
+        if (userByUsername) {
+            logger.error(`${moduleName} verify username - username already in use ${JSON.stringify(user.username)}`);
+            res.status(400).send({ message: 'Username already in use!' });
             return;
-        });
+        }
+
+        const userByEmail = await User.findOne({ email: req.body.email }).exec();
+        if (userByEmail) {
+            logger.error(`${moduleName} verify email - email already in use ${JSON.stringify(user.email)}`);
+            res.status(400).send({ message: 'Email already in use!' });
+            return;
+        }
+
+        next();
+
+    } catch (err) {
+        logger.error(`${moduleName} verify username/email unexpected error ${JSON.stringify(err)}`);
+        res.status(500).send({ message: err });
+        return;
+    }
 };
 
 
