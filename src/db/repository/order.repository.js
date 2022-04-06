@@ -7,15 +7,7 @@ const moduleName = 'order.repository.js -';
 
 exports.create = async (order) => {
     try {
-        const _order = await Order.create({
-            number: order.number,
-            status: order.description,
-            name: order.name,
-            address: order.address,
-            zip: order.zip,
-            totalPrice: order.totalPrice,
-            user: order.user,
-        });
+        const _order = await Order.create(order);
 
         if (!_order) {
             logger.info(`${moduleName} create order no response from db`);
@@ -59,8 +51,7 @@ exports.findAll = async () => {
 exports.update = async (id, order) => {
     try {
         const _order = await Order.update({
-            number: order.number,
-            status: order.description,
+            status: order.status,
             name: order.name,
             address: order.address,
             zip: order.zip,
@@ -77,7 +68,7 @@ exports.update = async (id, order) => {
             return;
         }
 
-        logger.info(`${moduleName} updated order id ${id}: ${JSON.stringify(order)}`);
+        logger.info(`${moduleName} updated order with id ${id}: ${JSON.stringify(order)}`);
         return _order.get({ plain: true });
 
     } catch (err) {
@@ -85,6 +76,30 @@ exports.update = async (id, order) => {
         return;
     }
 };
+
+exports.updateStatus = async (id, status) => {
+    try {
+        const order = await Order.update({
+            status: status,
+        }, {
+            where: {
+                id: id
+            }
+        });
+
+        if (!order) {
+            logger.error(`${moduleName} order to update not found id: ${id}`);
+            return;
+        }
+
+        logger.info(`${moduleName} updated order status with id ${id}: ${JSON.stringify(order)}`);
+        return order.get({ plain: true });
+
+    } catch (err) {
+        logger.error(`${moduleName} order update status error: ${JSON.stringify(err)}`);
+        return;
+    }
+}
 
 exports.findById = async (id) => {
     try {

@@ -8,9 +8,8 @@ exports.create = async (orderItem, orderId) => {
     try {
         const _orderItem = await OrderItem.create({
             name: orderItem.name,
-            totalPrice: orderItem.totalPrice,
             quantity: orderItem.quantity,
-            product: orderItem.product,
+            productId: orderItem.product,
             orderId: orderId,
         });
 

@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
                 notEmpty: true,
             },
         },
-        totalPrice: {
+        price: {
             type: DataTypes.INTEGER,
             allowNull: false,
             validate: {
@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
                 notEmpty: true,
             },
         },
-        product: {
+        productId: {
             type: DataTypes.BIGINT,
             allowNull: true,
         },
