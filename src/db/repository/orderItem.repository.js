@@ -4,21 +4,19 @@ const OrderItem = db.orderItem;
 
 const moduleName = 'orderItem.repository.js -';
 
-exports.create = async (orderItem, orderId) => {
+exports.create = async (orderItems) => {
     try {
-        const _orderItem = await OrderItem.create({
-            name: orderItem.name,
-            quantity: orderItem.quantity,
-            productId: orderItem.product,
-            orderId: orderId,
-        });
+        const _orderItems = await OrderItem.bulkCreate(orderItems);
 
-        if (!_orderItem) {
+        if (!_orderItems) {
             logger.info(`${moduleName} create orderItem no response from db`);
             return;
         }
 
-        return _orderItem.get({ plain: true });
+        logger.debug(`${moduleName} created orderItems ${JSON.stringify(_orderItems)}`);
+
+        const converted = _orderItems.map(orderItem => orderItem.get({ plain: true }));
+        return converted;
 
     } catch (err) {
         logger.error(`${moduleName} unexpected error on create orderItem ${JSON.stringify(err)}`);
@@ -39,6 +37,8 @@ exports.findAllByOrderId = async (orderId) => {
             return;
         }
 
+        logger.debug(`${moduleName} found all orderItems ${JSON.stringify(orderItems)}`);
+
         const converted = orderItems.map(orderItem => orderItem.get({ plain: true }));
         return converted;
 
@@ -57,7 +57,7 @@ exports.findById = async (id) => {
             return;
         }
 
-        logger.info(`${moduleName} retrieved orderItem by id: ${id} | ${JSON.stringify(orderItem)}`);
+        logger.debug(`${moduleName} retrieved orderItem by id: ${id} | ${JSON.stringify(orderItem)}`);
         return orderItem.get({ plain: true });
 
     } catch (err) {
@@ -95,7 +95,7 @@ exports.delete = async (id) => {
                 id: id
             }
         });
-
+        
         if (deletedorderItem !== 1) {
             logger.info(`${moduleName} orderItem and orderItemItems to delete not found id: ${id}`);
             return;

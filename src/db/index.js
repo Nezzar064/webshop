@@ -19,6 +19,7 @@ db.product = require('./models/product.model')(sequelize, Sequelize);
 db.order = require('./models/order.model')(sequelize, Sequelize);
 db.orderItem = require('./models/orderItem.model')(sequelize, Sequelize);
 
+db.sequelize = sequelize;
 
 db.order.hasMany(db.product, {
     as: 'orderItems',

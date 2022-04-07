@@ -39,6 +39,13 @@ module.exports = (sequelize, DataTypes) => {
                 notEmpty: true,
             },
         },
+        date: {
+            type: DataTypes.DATE,
+            allowNull: false,
+                validate: {
+                    notEmpty: true,
+                }
+        },
         totalPrice: {
             type: DataTypes.STRING,
             allowNull: false,

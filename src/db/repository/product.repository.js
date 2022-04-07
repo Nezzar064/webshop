@@ -19,6 +19,8 @@ exports.create = async (product) => {
             return;
         }
 
+        logger.debug(`${moduleName} created product ${JSON.stringify(_product)}`);
+
         return _product.get({ plain: true });
 
     } catch (err) {
@@ -35,6 +37,8 @@ exports.findAll = async () => {
             logger.info(`${moduleName} no products present in db`);
             return;
         }
+
+        logger.debug(`${moduleName} found all products succesfully`);
 
         const converted = products.map(product => product.get({ plain: true }));
         return converted;
@@ -64,7 +68,7 @@ exports.update = async (id, product) => {
             return;
         }
 
-        logger.info(`${moduleName} updated product id ${id}: ${JSON.stringify(product)}`);
+        logger.debug(`${moduleName} updated product, id ${id}: ${JSON.stringify(_product)}`);
         return _product.get({ plain: true });
 
     } catch (err) {
@@ -82,11 +86,87 @@ exports.findById = async (id) => {
             return;
         }
 
-        logger.info(`${moduleName} retrieved product by id: ${id} | ${JSON.stringify(product)}`);
+        logger.debug(`${moduleName} retrieved product by id: ${id} | ${JSON.stringify(product)}`);
         return product.get({ plain: true });
 
     } catch (err) {
         logger.error(`${moduleName} unexpected error on find product by id ${JSON.stringify(err)}`);
+        return;
+    }
+};
+
+exports.getProductPricesByIds = async (ids, transaction) => {
+    try {
+        const productPrices = await Product.findAll({
+            attributes: ['price'],
+            where: {
+                id: ids,
+            },
+        }, {});
+
+        if (!productPrices) {
+            logger.info(`${moduleName} product ${id} not present in db`);
+            return;
+        }
+
+        logger.debug(`${moduleName} retrieved product price by id: ${id} | ${JSON.stringify(product)}`);
+        const converted = productPrices.map(price => price.get({ plain: true }));
+        return converted;
+
+    } catch (err) {
+        logger.error(`${moduleName} unexpected error on find product price by id ${JSON.stringify(err)}`);
+        return;
+    }
+};
+
+exports.updateStock = async (itemsForUpdate) => {
+    const trx = await db.sequelize.transaction();
+
+    try {
+        const productStocks = await Product.findAll({
+            attributes: ['id', 'stock'],
+            where: {
+                id: itemsForUpdate.ids,
+            }
+        });
+
+        const updates = [];
+
+        productStocks.forEach(product => {
+            itemsForUpdate.items.forEach(item => {
+                if (product.id == item.productId) {
+                    product.stock = product.stock - item.quantity;
+
+                    updates.push(
+                        Product.update({
+                            stock: product.stock,
+                        }, {
+                            where: {
+                                id: product.id
+                            },
+                            transaction: trx
+                        })
+                    );
+                }
+            });
+        });
+
+        const updated = await Promise.all(updates);
+
+        if (!productStocks || !updated) {
+            logger.error(`${moduleName} failed to update product stock`);
+            return;
+        }
+
+        logger.debug(`${moduleName} updated product stock by ids: ${JSON.stringify(ids)}`);
+        trx.commit();
+
+        // product.service checks for this return
+        return true;
+
+    } catch (err) {
+        logger.error(`${moduleName} unexpected error on find product stock by id ${JSON.stringify(err)}`);
+        trx.rollback();
         return;
     }
 };
