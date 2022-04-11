@@ -4,26 +4,6 @@ const OrderItem = db.orderItem;
 
 const moduleName = 'orderItem.repository.js -';
 
-exports.create = async (orderItems) => {
-    try {
-        const _orderItems = await OrderItem.bulkCreate(orderItems);
-
-        if (!_orderItems) {
-            logger.info(`${moduleName} create orderItem no response from db`);
-            return;
-        }
-
-        logger.debug(`${moduleName} created orderItems ${JSON.stringify(_orderItems)}`);
-
-        const converted = _orderItems.map(orderItem => orderItem.get({ plain: true }));
-        return converted;
-
-    } catch (err) {
-        logger.error(`${moduleName} unexpected error on create orderItem ${JSON.stringify(err)}`);
-        return;
-    }
-};
-
 exports.findAllByOrderId = async (orderId) => {
     try {
         const orderItems = await OrderItem.findAll({

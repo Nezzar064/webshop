@@ -1,20 +1,43 @@
 const db = require('../index');
 const logger = require('../../utils/logger.js');
 const OrderItem = db.orderItem;
+const ContactInfo = db.contactInfo;
 const Order = db.order;
+const OrderItemAssoc = db.OrderItemAssoc;
+const ContactInfoAssoc = db.ContactInfoAssoc;
 
 const moduleName = 'order.repository.js -';
 
 exports.create = async (order) => {
     try {
-        const _order = await Order.create(order);
+        const _order = await Order.create({
+            date: order.date,
+            totalPrice: order.totalPrice,
+            user: order.user,
+            orderItems: order.orderItems,
+            contactInfo: {
+                name: order.contactInfo.name,
+                address: order.contactInfo.address,
+                email: order.contactInfo.email,
+                city: order.contactInfo.city,
+                zip: order.contactInfo.zip
+            }
+        }, {
+            include: [OrderItemAssoc, ContactInfoAssoc]
+        });
 
         if (!_order) {
             logger.info(`${moduleName} create order no response from db`);
             return;
         }
 
-        return _order.get({ plain: true });
+        const result = {
+            order: _order.get({ plain: true }),
+            orderItems: _order.orderItems.map(item => item.get({ plain: true})),
+            contactInfo: _order.contactInfo.get({ plain: true}),
+        }
+
+        return result;
 
     } catch (err) {
         logger.error(`${moduleName} unexpected error on create order ${JSON.stringify(err)}`);
@@ -29,7 +52,13 @@ exports.findAll = async () => {
                 model: OrderItem,
                 as: 'orderItems',
                 attributes: ['id', 'name', 'totalPrice', 'quantity']
-            }],
+            },
+            {
+                model: ContactInfo,
+                as: 'contactInfo',
+                attributes: ['id', 'name', 'address', 'email', 'city', 'zip'] 
+            }
+        ],
             raw: true,
             nested: true,
         });
@@ -54,6 +83,7 @@ exports.update = async (id, order) => {
             status: order.status,
             name: order.name,
             address: order.address,
+            email: order.email,
             zip: order.zip,
             totalPrice: order.totalPrice,
             user: order.user,
@@ -108,7 +138,13 @@ exports.findById = async (id) => {
                 model: OrderItem,
                 as: 'orderItems',
                 attributes: ['id', 'name', 'totalPrice', 'quantity']
-            }],
+            },
+            {
+                model: ContactInfo,
+                as: 'contactInfo',
+                attributes: ['id', 'name', 'address', 'email', 'city', 'zip'] 
+            }
+        ],
             raw: true,
             nested: true,
         });
@@ -127,7 +163,7 @@ exports.findById = async (id) => {
     }
 };
 
-exports.findAllByUser = async (user) => {
+exports.findAllByUserId = async (user) => {
     try {
         const orders = await Order.findAll({
             where: {
@@ -137,7 +173,13 @@ exports.findAllByUser = async (user) => {
                 model: OrderItem,
                 as: 'orderItems',
                 attributes: ['id', 'name', 'totalPrice', 'quantity']
-            }],
+            },
+            {
+                model: ContactInfo,
+                as: 'contactInfo',
+                attributes: ['id', 'name', 'address', 'email', 'city', 'zip'] 
+            }
+        ],
             raw: true,
             nested: true,
         });

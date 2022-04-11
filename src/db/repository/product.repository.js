@@ -95,7 +95,7 @@ exports.findById = async (id) => {
     }
 };
 
-exports.getProductPricesByIds = async (ids, transaction) => {
+exports.getProductPricesByIds = async (ids) => {
     try {
         const productPrices = await Product.findAll({
             attributes: ['price'],
@@ -119,14 +119,14 @@ exports.getProductPricesByIds = async (ids, transaction) => {
     }
 };
 
-exports.updateStock = async (itemsForUpdate) => {
+exports.updateStock = async (ids, itemsForUpdate) => {
     const trx = await db.sequelize.transaction();
 
     try {
         const productStocks = await Product.findAll({
             attributes: ['id', 'stock'],
             where: {
-                id: itemsForUpdate.ids,
+                id: ids,
             }
         });
 
@@ -136,7 +136,7 @@ exports.updateStock = async (itemsForUpdate) => {
         }
 
         const updates = productStocks.map(product => {
-            itemsForUpdate.items.forEach(item => {
+            itemsForUpdate.forEach(item => {
                 if (product.id == item.productId) {
                     product.stock = product.stock - item.quantity;
 
