@@ -1,7 +1,8 @@
-const guards = require('../middlewares/guards');
+const auth = require('../middlewares/verifyAuth');
 const controller = require('../controllers/verification.controller');
-const verifyToken = require('../middlewares/jwt');
 const router = require('express').Router();
+
+// verifyToken: true/false indicates if roles are included + next()
 
 module.exports = (app) => {
     app.use((req, res, next) => {
@@ -12,20 +13,20 @@ module.exports = (app) => {
         next();
     });
 
-    router.get('/token/verify', verifyToken, controller.verifyTokenWithNoGuard);
+    router.get('/token/verify', auth.verifyToken(false), controller.verifyToken);
 
     router.get('/guards/admin/verify',
     [
-        guards.verifyTokenWithGuard,
-        guards.adminGuard
+        auth.verifyToken(true),
+        auth.adminGuard
     ],
     controller.verifyTokenWithAdminGuard
     );
 
     router.get('/guards/mod/verify',
     [
-        guards.verifyTokenWithGuard,
-        guards.modGuard
+        auth.verifyToken(true),
+        auth.modGuard
     ],
     controller.verifyTokenWithModGuard
     );

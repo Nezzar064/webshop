@@ -13,3 +13,7 @@ logs
 # other
 *.txt
 .jshintrc
+
+# keys
+private-key.pem
+public-key.pem

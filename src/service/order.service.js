@@ -35,7 +35,7 @@ exports.createOrder = async (body, user) => {
         const items = await orderItemRepo.create(itemsToCreate);
 
         if (!order && !items) {
-            return {message: 'Failed to process order!'};
+            return { message: 'Failed to process order!' };
         }
 
         return ({...order, items});
@@ -46,10 +46,32 @@ exports.createOrder = async (body, user) => {
     }
 };
 
-// Used for calculating total price when placing an order
+// Helper func. used for calculating total price when placing an order
 const calculateTotalPrice = (orderItems) => {
     let price = orderItems.forEach(item => {
         price =+ item.quantity * item.price;
     });
     return price.toFixed(2);
+}
+
+exports.deleteOrder = async (id) => {
+    try {
+        // First delete order items
+        const deletedItems = await orderItemRepo.deleteByOrderId(id);
+
+        // Then order
+        const deletedOrder = await orderRepo.deleteById(id);
+
+        if (!deletedItems && !deletedOrder) {
+            logger.error(`${moduleName} failed to delete order, id: ${id}`);
+            return { message: 'Failed to delete order!' };
+        }
+
+        logger.error(`${moduleName} deleted order, id: ${id}`);
+        return { message: 'Order successfully deleted' };
+
+    } catch (err) {
+        logger.error(`${moduleName} unexpected error on delete order ${JSON.stringify(err)}`);
+        return;
+    }
 }

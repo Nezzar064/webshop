@@ -1,4 +1,4 @@
-exports.verifyTokenWithNoGuard = (req, res) => {
+exports.verifyToken = (req, res) => {
     res.status(200).send({verified: true});
 };
 

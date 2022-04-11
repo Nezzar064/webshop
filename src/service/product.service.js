@@ -12,7 +12,7 @@ exports.calculateTotalPrice = async (items) => {
         const prices = await productRepo.getProductPricesByIds(ids);
 
         if (!prices) {
-            logger.error(`${moduleName} calculate total price no response from repo`);
+            logger.error(`${moduleName} calculate total price no response from db`);
             return;
         }
     
@@ -43,7 +43,7 @@ exports.updateStock = async (items) => {
         const updated = await productRepo.updateStock(itemsForUpdate);
         
         if(!updated) {
-            logger.error(`${moduleName} update stock no response from repo`);
+            logger.error(`${moduleName} update stock no response from db`);
             return;
         }
 

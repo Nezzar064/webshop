@@ -157,7 +157,7 @@ exports.findAllByUser = async (user) => {
     }
 };
 
-exports.delete = async (id) => {
+exports.deleteById = async (id) => {
     try {
         const deletedOrder = await Order.destroy({
             where: {
@@ -171,7 +171,7 @@ exports.delete = async (id) => {
         }
 
         logger.info(`${moduleName} delete order success, id: ${id}`);
-        return { message: 'order deleted successfully' };
+        return true;
 
     } catch (err) {
         logger.error(`${moduleName} unexpected error on delete order: ${JSON.stringify(err)}`);

@@ -130,30 +130,32 @@ exports.updateStock = async (itemsForUpdate) => {
             }
         });
 
-        const updates = [];
+        if (!productStocks) {
+            logger.error(`${moduleName} failed to update product stock`);
+            return;
+        }
 
-        productStocks.forEach(product => {
+        const updates = productStocks.map(product => {
             itemsForUpdate.items.forEach(item => {
                 if (product.id == item.productId) {
                     product.stock = product.stock - item.quantity;
 
-                    updates.push(
-                        Product.update({
+                    return Product.update({
                             stock: product.stock,
                         }, {
                             where: {
                                 id: product.id
                             },
                             transaction: trx
-                        })
-                    );
+                        });
                 }
-            });
+                return;
+            })
         });
 
         const updated = await Promise.all(updates);
 
-        if (!productStocks || !updated) {
+        if (!updated) {
             logger.error(`${moduleName} failed to update product stock`);
             return;
         }
@@ -165,7 +167,7 @@ exports.updateStock = async (itemsForUpdate) => {
         return true;
 
     } catch (err) {
-        logger.error(`${moduleName} unexpected error on find product stock by id ${JSON.stringify(err)}`);
+        logger.error(`${moduleName} unexpected error on update stock, rolling back ${JSON.stringify(err)}`);
         trx.rollback();
         return;
     }

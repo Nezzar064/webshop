@@ -75,37 +75,38 @@ exports.deleteByOrderId = async (orderId) => {
         });
 
         if (deletedorderItem !== 1) {
-            logger.info(`${moduleName} orderItem and orderItemItems to delete not found id: ${id}`);
+            logger.info(`${moduleName} orderItem to delete by orderId not found id: ${id}`);
             return;
         }
 
-        logger.info(`${moduleName} delete orderItem success, id: ${id}`);
-        return { message: 'orderItem deleted successfully' };
+        logger.info(`${moduleName} delete orderItem by orderId success, id: ${id}`);
+        return true;
 
     } catch (err) {
-        logger.error(`${moduleName} unexpected error on delete orderItem: ${JSON.stringify(err)}`);
+        logger.error(`${moduleName} unexpected error on delete orderItem by orderId: ${JSON.stringify(err)}`);
         return;
     }
 };
 
-exports.delete = async (id) => {
+exports.deleteById = async (id) => {
     try {
-        const deletedorderItem = await OrderItem.destroy({
+        const deletedOrderItem = await OrderItem.destroy({
             where: {
                 id: id
             }
         });
         
-        if (deletedorderItem !== 1) {
-            logger.info(`${moduleName} orderItem and orderItemItems to delete not found id: ${id}`);
+        if (deletedOrderItem !== 1) {
+            logger.info(`${moduleName} orderItem to delete not found id: ${id}`);
             return;
         }
 
         logger.info(`${moduleName} delete orderItem success, id: ${id}`);
-        return { message: 'orderItem deleted successfully' };
+        return true;
 
     } catch (err) {
         logger.error(`${moduleName} unexpected error on delete orderItem: ${JSON.stringify(err)}`);
         return;
     }
 };
+

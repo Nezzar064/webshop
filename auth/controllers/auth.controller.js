@@ -1,9 +1,12 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const fs = require('fs');
+
 const User = require('../db/models/user.model');
 const Role = require('../db/models/role.model');
-const RefreshToken = require('../db/models/RefreshToken.model');
+const RefreshToken = require('../db/models/refreshToken.model');
 const logger = require('../utils/logger');
+const key = fs.readFileSync('private-key.pem');
 
 const moduleName = 'auth.controller.js';
 
@@ -55,12 +58,10 @@ exports.signIn = async (req, res) => {
         }
 
         // Create access token upon login
-        let token = jwt.sign({ id: user.id }, process.env.SECRET_KEY, {
-            expiresIn: parseInt(process.env.ACCESS_TOKEN_EXPIRY),
-        });
+        let token = await generateJWT(user);
 
         // Find refresh token if it exists, otherwise create a new one.
-        let refreshToken = RefreshToken.findOne({ user: user._id }).exec();
+        let refreshToken = await RefreshToken.findOne({ user: user._id }).exec();
         if (!refreshToken) {
             logger.info(`${moduleName} created new refresh token for user ${JSON.stringify(user._id)}`);
             refreshToken = await RefreshToken.createRefreshToken(user);
@@ -79,7 +80,7 @@ exports.signIn = async (req, res) => {
             email: user.email,
             roles: _roles,
             accessToken: token,
-            refreshToken: refreshToken,
+            refreshToken: refreshToken.token,
         });
     } catch (e) {
         logger.error(`${moduleName} unexpected error during sign-in ${JSON.stringify(e)}`);
@@ -95,7 +96,7 @@ exports.refreshToken = async (req, res) => {
             return res.status(403).send({ message: 'Refresh token is required' });
         }
 
-        const refreshToken = RefreshToken.findOne({ token: requestToken }).exec();
+        const refreshToken = await RefreshToken.findOne({ token: requestToken }).exec();
         if (!refreshToken) {
             logger.error(`${moduleName} Refresh Token not present in database`);
             res.status(403).send({ message: 'Refresh token could not be found!' });
@@ -111,10 +112,15 @@ exports.refreshToken = async (req, res) => {
             return;
         }
 
+        const user = await User.findById(refreshToken.user._id).exec();
+        if (!user) {
+            logger.error(`${moduleName} User representing refresh token not found`);
+            res.status(403).send({ message: 'User representing refresh token not found!' });
+            return;
+        }
+
         // Generate new access token
-        let _accessToken = jwt.sign({ id: refreshToken.user._id }, process.env.SECRET_KEY, {
-            expiresIn: parseInt(process.env.ACCESS_TOKEN_EXPIRY),
-        });
+        let _accessToken = await generateJWT(user);
 
         return res.status(200).send({
             accessToken: _accessToken,
@@ -126,3 +132,15 @@ exports.refreshToken = async (req, res) => {
         return res.status(500).end();
     }
 };
+
+// Utilized instead of duplicate code
+const generateJWT = (user) => {
+    return new Promise((resolve, reject) => {
+        jwt.sign({ id: user.id, roles: user.roles }, {key: key, passphrase: process.env.PRIVATE_KEY_PW}, { algorithm: 'RS256' }, function(err, token) {
+            if (err) {
+                reject(err);
+            }
+            resolve(token);
+          });
+    })
+}
