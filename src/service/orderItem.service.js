@@ -13,7 +13,7 @@ exports.findAllByOrderId = async (orderId) => {
             return;
         }
 
-        logger.debug(`${moduleName} successfully found order items order id: ${id}`);
+        logger.debug(`${moduleName} successfully found order items order id: ${orderId}`);
         return orderItems;
 
     } catch (err) {
@@ -41,40 +41,21 @@ exports.findById = async (id) => {
     }
 };
 
-exports.delete = async (id) => {
+exports.delete = async (orderId, id) => {
     try {
 
-        const deleted = await orderItemRepo.deleteById(id);
+        const deleted = await orderItemRepo.delete(orderId, id);
 
         if(!deleted) {
             logger.error(`${moduleName} delete order item no response from db`);
             return;
         }
 
-        logger.debug(`${moduleName} successfully deleted order item by id: ${id}`);
-        return deleted;
+        logger.debug(`${moduleName} successfully deleted order item ${id}`);
+        return true;
 
     } catch (err) {
-        logger.error(`${moduleName} unexpected error on delete order item by id ${JSON.stringify(err)}`);
-        return;
-    }
-};
-
-exports.deleteByOrderId = async (orderId) => {
-    try {
-
-        const deleted = await orderItemRepo.deleteByOrderId(orderId);
-
-        if(!deleted) {
-            logger.error(`${moduleName} delete order item by orderId no response from db`);
-            return;
-        }
-
-        logger.debug(`${moduleName} successfully deleted order item by order id: ${id}`);
-        return deleted;
-
-    } catch (err) {
-        logger.error(`${moduleName} unexpected error on delete order item by orderId ${JSON.stringify(err)}`);
+        logger.error(`${moduleName} unexpected error on delete order item ${JSON.stringify(err)}`);
         return;
     }
 };

@@ -1,6 +1,8 @@
 const orderRepo = require('../db/repository/order.repository');
+const productService = require('./product.service');
 const logger = require('../utils/logger');
-const mailer = require('../utils/mailer');
+const sendEmail = require('../utils/mailer');
+const db = require("../db");
 
 const moduleName = 'order.service.js -';
 
@@ -12,7 +14,7 @@ const emailHtml = (order) => {
                     <li>Quantity: ${item.quantity}</li>
                     <li>Price: ${item.totalPrice}</li>
                 </ul>
-                <br>`
+                <br>`;
     });
 
     return `<h1>Hello ${order.contactInfo.name}</h1>
@@ -39,16 +41,18 @@ const emailHtml = (order) => {
     </ul>
     <br>
     ${orderItems}
-    <p>Alternatively, if you created an user during checkout,
+    <p>Alternatively, if you created a user during checkout,
         you can log on the webshop and check out your order there.
         We will inform you once your order has shipped.
     </p>
     <br>
-    <p>Best regards, The Webshop</p>`
-}
+    <p>Best regards, The Webshop</p>`;
+};
 
 
-exports.createOrder = async (body, user) => {
+exports.createOrder = async (body) => {
+    const trx = await db.sequelize.transaction();
+
     try {
         // Default order status is pending, set by model
         const orderToCreate = {
@@ -56,25 +60,30 @@ exports.createOrder = async (body, user) => {
             date: new Date(),
             totalPrice: calculateTotalPrice(body.orderItems),
             orderItems: body.orderItems,
-        }
+        };
         
-        if (user) {
-            orderToCreate.user = user;
+        if (body.user) {
+            orderToCreate.user = body.user;
         }
 
-        const order = await orderRepo.create(orderToCreate);
+        const order = await orderRepo.create(orderToCreate, trx);
+        const updatedStock = await productService.updateStock(order.orderItems, trx);
 
-        if (!order) {
+        if (!order || !updatedStock) {
+            await trx.rollback();
             return { message: 'Failed to process order!' };
         }
 
+        await trx.commit();
+
         // Send email to email entered in checkout
-        await mailer.sendEmail(order.contactInfo.email, `Your order: ${order.id}`, emailHtml);
+        await sendEmail(order.contactInfo.email, `Your order: ${order.id}`, emailHtml);
 
         return order;
 
     } catch (err) {
         logger.error(`${moduleName} unexpected error on create order ${JSON.stringify(err)}`);
+        await trx.rollback();
         return;
     }
 };
@@ -85,7 +94,7 @@ const calculateTotalPrice = (orderItems) => {
         price =+ item.quantity * item.price;
     });
     return price.toFixed(2);
-}
+};
 
 exports.deleteOrder = async (id) => {
     try {
@@ -93,17 +102,17 @@ exports.deleteOrder = async (id) => {
 
         if (!!deletedOrder) {
             logger.error(`${moduleName} failed to delete order, id: ${id}`);
-            return { message: 'Failed to delete order!' };
+            return;
         }
 
         logger.error(`${moduleName} deleted order, id: ${id}`);
-        return { message: 'Order successfully deleted' };
+        return true;
 
     } catch (err) {
         logger.error(`${moduleName} unexpected error on delete order ${JSON.stringify(err)}`);
         return;
     }
-}
+};
 
 exports.findAll = async () => {
     try {
@@ -173,7 +182,7 @@ exports.updateStatus = async (id, status) => {
         }
 
         logger.debug(`${moduleName} successfully updated order status`);
-        return products;
+        return updated;
 
     } catch (err) {
         logger.error(`${moduleName} unexpected error on update order status ${JSON.stringify(err)}`);

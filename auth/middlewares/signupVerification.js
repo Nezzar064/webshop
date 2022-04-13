@@ -11,14 +11,14 @@ signupValidator = async (req, res, next) => {
         //Check if username is duplicated
         const userByUsername = await User.findOne({ username: req.body.username }).exec();
         if (userByUsername) {
-            logger.error(`${moduleName} verify username - username already in use ${JSON.stringify(user.username)}`);
+            logger.error(`${moduleName} verify username - username already in use ${JSON.stringify(req.body.username)}`);
             res.status(400).send({ message: 'Username already in use!' });
             return;
         }
 
         const userByEmail = await User.findOne({ email: req.body.email }).exec();
         if (userByEmail) {
-            logger.error(`${moduleName} verify email - email already in use ${JSON.stringify(user.email)}`);
+            logger.error(`${moduleName} verify email - email already in use ${JSON.stringify(req.body.email)}`);
             res.status(400).send({ message: 'Email already in use!' });
             return;
         }

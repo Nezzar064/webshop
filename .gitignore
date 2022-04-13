@@ -1,11 +1,16 @@
 # npm
 node_modules
 package-lock.json
-*.log
 *.gz
+
+# IDE / extensions
 .vscode
 .VSCodeCounter
+idea
+
+# logs
 logs
+*.log
 
 # dotenv
 .env

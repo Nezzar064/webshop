@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const orderItem = sequelize.define('orderItems', {
+    return sequelize.define('orderItems', {
         name: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -28,8 +28,6 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
         },
     });
-
-    return orderItem;
 };
 
 

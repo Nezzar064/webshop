@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
-    const order = sequelize.define('orders', {
+    return sequelize.define('orders', {
         status: {
-            type: DataTypes.ENUM('PENDING','PROCESSING','CANCELLED','COMPLETED'),
+            type: DataTypes.ENUM('PENDING', 'PROCESSING', 'CANCELLED', 'COMPLETED'),
             defaultValue: 'PENDING',
             allowNull: false,
             validate: {
@@ -11,14 +11,14 @@ module.exports = (sequelize, DataTypes) => {
         date: {
             type: DataTypes.DATE,
             allowNull: false,
-                validate: {
-                    notEmpty: true,
-                }
+            validate: {
+                notEmpty: true,
+            }
         },
         totalPrice: {
             type: DataTypes.STRING,
             allowNull: false,
-                validate: {
+            validate: {
                 notEmpty: true,
             },
         },
@@ -27,8 +27,6 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: true,
         },
     });
-
-    return order;
 };
 
 

@@ -46,47 +46,27 @@ exports.findById = async (id) => {
     }
 };
 
-exports.deleteByOrderId = async (orderId) => {
-    try {
-        const deletedorderItem = await OrderItem.destroy({
-            where: {
-                orderId: orderId
-            }
-        });
-
-        if (deletedorderItem !== 1) {
-            logger.info(`${moduleName} orderItem to delete by orderId not found id: ${id}`);
-            return;
-        }
-
-        logger.info(`${moduleName} delete orderItem by orderId success, id: ${id}`);
-        return true;
-
-    } catch (err) {
-        logger.error(`${moduleName} unexpected error on delete orderItem by orderId: ${JSON.stringify(err)}`);
-        return;
-    }
-};
-
-exports.deleteById = async (id) => {
+exports.delete = async (orderId, id) => {
     try {
         const deletedOrderItem = await OrderItem.destroy({
             where: {
-                id: id
+                id: id,
+                orderId: orderId,
             }
         });
-        
+
         if (deletedOrderItem !== 1) {
-            logger.info(`${moduleName} orderItem to delete not found id: ${id}`);
+            logger.info(`${moduleName} orderItem to delete not found id: ${id}, orderId ${orderId}`);
             return;
         }
 
-        logger.info(`${moduleName} delete orderItem success, id: ${id}`);
+        logger.info(`${moduleName} delete orderItem by orderId success, id: ${id}, orderId ${orderId}`);
         return true;
 
     } catch (err) {
-        logger.error(`${moduleName} unexpected error on delete orderItem: ${JSON.stringify(err)}`);
+        logger.error(`${moduleName} unexpected error on delete orderItem ${JSON.stringify(err)}`);
         return;
     }
 };
+
 

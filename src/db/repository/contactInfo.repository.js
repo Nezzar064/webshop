@@ -19,11 +19,11 @@ exports.update = async (orderId, contactInfo) => {
         });
         
         if (!_contactInfo) {
-            logger.error(`${moduleName} contact info to update not found id: ${id}`);
+            logger.error(`${moduleName} contact info to update not found id: ${orderId}`);
             return;
         }
 
-        logger.info(`${moduleName} updated contact info with order id ${id}: ${JSON.stringify(order)}`);
+        logger.info(`${moduleName} updated contact info with order id ${orderId}: ${JSON.stringify(_contactInfo)}`);
         return _contactInfo.get({ plain: true });
 
     } catch (err) {
@@ -41,11 +41,11 @@ exports.deleteByOrderId = async (orderId) => {
         });
 
         if (deletedContactInfo !== 1) {
-            logger.info(`${moduleName} contact info to delete not found id: ${id}`);
+            logger.info(`${moduleName} contact info to delete not found id: ${orderId}`);
             return;
         }
 
-        logger.info(`${moduleName} delete contact info success, id: ${id}`);
+        logger.info(`${moduleName} delete contact info success, id: ${orderId}`);
         return true;
 
     } catch (err) {

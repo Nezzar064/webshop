@@ -95,6 +95,8 @@ exports.findById = async (id) => {
     }
 };
 
+//Maybe not needed after all
+/*
 exports.getProductPricesByIds = async (ids) => {
     try {
         const productPrices = await Product.findAll({
@@ -118,10 +120,9 @@ exports.getProductPricesByIds = async (ids) => {
         return;
     }
 };
+ */
 
-exports.updateStock = async (ids, itemsForUpdate) => {
-    const trx = await db.sequelize.transaction();
-
+exports.updateStock = async (ids, itemsForUpdate, trx) => {
     try {
         const productStocks = await Product.findAll({
             attributes: ['id', 'stock'],
@@ -137,7 +138,7 @@ exports.updateStock = async (ids, itemsForUpdate) => {
 
         const updates = productStocks.map(product => {
             itemsForUpdate.forEach(item => {
-                if (product.id == item.productId) {
+                if (product.id === item.productId) {
                     product.stock = product.stock - item.quantity;
 
                     return Product.update({
@@ -150,7 +151,7 @@ exports.updateStock = async (ids, itemsForUpdate) => {
                         });
                 }
                 return;
-            })
+            });
         });
 
         const updated = await Promise.all(updates);
@@ -161,14 +162,12 @@ exports.updateStock = async (ids, itemsForUpdate) => {
         }
 
         logger.debug(`${moduleName} updated product stock by ids: ${JSON.stringify(ids)}`);
-        trx.commit();
 
         // product.service checks for this return
         return true;
 
     } catch (err) {
         logger.error(`${moduleName} unexpected error on update stock, rolling back ${JSON.stringify(err)}`);
-        trx.rollback();
         return;
     }
 };

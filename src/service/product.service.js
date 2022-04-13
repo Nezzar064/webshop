@@ -3,10 +3,12 @@ const logger = require('../utils/logger');
 
 const moduleName = 'product.service.js -';
 
+//Maybe not needed after all
+/*
 exports.calculateTotalPrice = async (items) => {
     try {
         const ids = items.map(item => {
-            item.id
+            return item.id;
         });
 
         const prices = await productRepo.getProductPricesByIds(ids);
@@ -28,14 +30,15 @@ exports.calculateTotalPrice = async (items) => {
         return;
     }
 };
+ */
 
-exports.updateStock = async (items) => {
+exports.updateStock = async (items, trx) => {
     try {
         const ids = items.map(item => {
-            return item.id
+            return item.id;
         });
 
-        const updated = await productRepo.updateStock(ids, items);
+        const updated = await productRepo.updateStock(ids, items, trx);
         
         if(!updated) {
             logger.error(`${moduleName} update stock no response from db`);
@@ -44,7 +47,7 @@ exports.updateStock = async (items) => {
 
         logger.debug(`${moduleName} successfully updated product stock`);
 
-        // Controller runs a check on this
+        // Order service runs a check on this
         return true;
 
     } catch (err) {
@@ -140,7 +143,7 @@ exports.delete = async (id) => {
         }
 
         logger.debug(`${moduleName} successfully deleted product by id: ${id}`);
-        return deleted;
+        return true;
 
     } catch (err) {
         logger.error(`${moduleName} unexpected error on delete product ${JSON.stringify(err)}`);

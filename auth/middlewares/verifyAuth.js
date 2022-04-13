@@ -26,7 +26,7 @@ const verifyToken = (includeRoles) => {
             // Verify token
             const decoded = await jwt.verify(token, publicKey, { algorithms: ['RS256'] });
             if (!decoded) {
-                logger.error(`${moduleName} token is invalid ${JSON.stringify(err)}`);
+                logger.error(`${moduleName} token is invalid`);
                 res.status(401).send({ message: 'Token not valid - Unauthorized!' });
                 return;
             }
@@ -52,7 +52,7 @@ const verifyToken = (includeRoles) => {
             logger.error(`${moduleName} unexpected error validating token ${JSON.stringify(err)}`);
             return res.status(500).end();
         }
-    }
+    };
 };
 
 // Admin guard
@@ -103,4 +103,4 @@ const verifyAuth = {
     modGuard,
 };
 
-module.exports = jwtUtil;
+module.exports = verifyAuth;

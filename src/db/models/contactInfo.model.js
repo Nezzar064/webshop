@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-    const contactInfo = sequelize.define('contactInfo', {
+    return sequelize.define('contactInfo', {
         name: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -25,18 +25,16 @@ module.exports = (sequelize, DataTypes) => {
         city: {
             type: DataTypes.STRING,
             allowNull: false,
-                validate: {
+            validate: {
                 notEmpty: true,
             },
         },
         zip: {
             type: DataTypes.STRING,
             allowNull: false,
-                validate: {
+            validate: {
                 notEmpty: true,
             },
         },
     });
-
-    return contactInfo;
 };

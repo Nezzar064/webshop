@@ -15,32 +15,36 @@ const initial = (roles) => {
         if (!err && count === 0) {
             roles.forEach(role => {
                 new Role({
-                    name: role 
+                    name: role
                 })
-                .save(err => {
-                    if (err) {
-                        logger.error(`${moduleName} Unexpected error when adding roles ${JSON.stringify(err)}`);
-                    }
-                    logger.info(`${moduleName} Role added: ${role}`);
-                });
+                    .save(err => {
+                        if (err) {
+                            logger.error(`${moduleName} Unexpected error when adding roles ${JSON.stringify(err)}`);
+                        }
+                        logger.info(`${moduleName} Role added: ${role}`);
+                    });
             });
         }
     });
 };
 
-const initDb = () => {
-    mongoose.connect(`mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-    })
-    .then(() => {
+const initDb = async () => {
+    try {
+        const options = {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        };
+
+        await mongoose.connect(`mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`, options);
+
         logger.info(`${moduleName} Database successfully initialized`);
         initial(roles);
-    })
-    .catch((err) => {
+
+    } catch (err) {
+
         logger.error(`${moduleName} Unexpected error when initializing database, exiting ${JSON.stringify(err)}`);
         process.exit();
-    });
+    }
 };
 
 exports.initializeDatabase = initDb;

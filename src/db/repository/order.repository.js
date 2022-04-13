@@ -8,7 +8,7 @@ const ContactInfoAssoc = db.ContactInfoAssoc;
 
 const moduleName = 'order.repository.js -';
 
-exports.create = async (order) => {
+exports.create = async (order, trx) => {
     try {
         const _order = await Order.create({
             date: order.date,
@@ -23,7 +23,8 @@ exports.create = async (order) => {
                 zip: order.contactInfo.zip
             }
         }, {
-            include: [OrderItemAssoc, ContactInfoAssoc]
+            include: [OrderItemAssoc, ContactInfoAssoc],
+            transaction: trx
         });
 
         if (!_order) {
@@ -35,7 +36,7 @@ exports.create = async (order) => {
             order: _order.get({ plain: true }),
             orderItems: _order.orderItems.map(item => item.get({ plain: true})),
             contactInfo: _order.contactInfo.get({ plain: true}),
-        }
+        };
 
         return result;
 
@@ -129,7 +130,7 @@ exports.updateStatus = async (id, status) => {
         logger.error(`${moduleName} order update status error: ${JSON.stringify(err)}`);
         return;
     }
-}
+};
 
 exports.findById = async (id) => {
     try {
