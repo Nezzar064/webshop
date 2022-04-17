@@ -1,5 +1,6 @@
 const db = require('../index');
 const logger = require('../../utils/logger.js');
+const {AppError} = require("../../error");
 const OrderItem = db.orderItem;
 const ContactInfo = db.contactInfo;
 const Order = db.order;
@@ -8,200 +9,157 @@ const ContactInfoAssoc = db.ContactInfoAssoc;
 
 const moduleName = 'order.repository.js -';
 
-exports.create = async (order, trx) => {
-    try {
-        const _order = await Order.create({
-            date: order.date,
-            totalPrice: order.totalPrice,
-            user: order.user,
-            orderItems: order.orderItems,
-            contactInfo: {
-                name: order.contactInfo.name,
-                address: order.contactInfo.address,
-                email: order.contactInfo.email,
-                city: order.contactInfo.city,
-                zip: order.contactInfo.zip
-            }
-        }, {
-            include: [OrderItemAssoc, ContactInfoAssoc],
-            transaction: trx
-        });
-
-        if (!_order) {
-            logger.info(`${moduleName} create order no response from db`);
-            return;
+exports.create = async (order, transaction) => {
+    const _order = await Order.create({
+        date: order.date,
+        totalPrice: order.totalPrice,
+        user: order.user,
+        orderItems: order.orderItems,
+        contactInfo: {
+            name: order.contactInfo.name,
+            address: order.contactInfo.address,
+            email: order.contactInfo.email,
+            city: order.contactInfo.city,
+            zip: order.contactInfo.zip
         }
+    }, {
+        include: [OrderItemAssoc, ContactInfoAssoc],
+        transaction
+    });
 
-        const result = {
-            order: _order.get({ plain: true }),
-            orderItems: _order.orderItems.map(item => item.get({ plain: true})),
-            contactInfo: _order.contactInfo.get({ plain: true}),
-        };
-
-        return result;
-
-    } catch (err) {
-        logger.error(`${moduleName} unexpected error on create order ${JSON.stringify(err)}`);
+    if (!_order) {
+        logger.info(`${moduleName} create order no response from db`);
         return;
     }
+
+    return _order.get({plain: true});
 };
 
 exports.findAll = async () => {
-    try {
-        const orders = await Order.findAll({
-            include: [{
-                model: OrderItem,
-                as: 'orderItems',
-                attributes: ['id', 'name', 'totalPrice', 'quantity']
-            },
+    const orders = await Order.findAll({
+        include: [{
+            model: OrderItem,
+            as: 'orderItems',
+            attributes: ['id', 'name', 'totalPrice', 'quantity']
+        },
             {
                 model: ContactInfo,
                 as: 'contactInfo',
-                attributes: ['id', 'name', 'address', 'email', 'city', 'zip'] 
+                attributes: ['id', 'name', 'address', 'email', 'city', 'zip']
             }
         ],
-            raw: true,
-            nested: true,
-        });
+        raw: true,
+        nested: true,
+    });
 
-        if (!orders) {
-            logger.info(`${moduleName} no orders present in db`);
-            return;
-        }
-
-        const converted = orders.map(order => order.get({ plain: true }));
-        return converted;
-
-    } catch (err) {
-        logger.error(`${moduleName} unexpected error on findAll items ${JSON.stringify(err)}`);
-        return;
+    if (!orders || orders.length === 0) {
+        logger.info(`${moduleName} no orders present in db`);
+        throw new AppError('No orders present in DB!', 404, true);
     }
+
+    return orders.map(order => order.get({plain: true}));
 };
 
 exports.update = async (id, order) => {
-    try {
-        const _order = await Order.update({
-            status: order.status,
-            name: order.name,
-            address: order.address,
-            email: order.email,
-            zip: order.zip,
-            totalPrice: order.totalPrice,
-            user: order.user,
-        }, {
-            where: {
-                id: id
-            }
-        });
-        
-        if (!_order) {
-            logger.error(`${moduleName} order to update not found id: ${id}`);
-            return;
+    const _order = await Order.update({
+        status: order.status,
+        name: order.name,
+        address: order.address,
+        email: order.email,
+        zip: order.zip,
+        totalPrice: order.totalPrice,
+        user: order.user,
+    }, {
+        where: {
+            id: id
         }
+    });
 
-        logger.info(`${moduleName} updated order with id ${id}: ${JSON.stringify(order)}`);
-        return _order.get({ plain: true });
-
-    } catch (err) {
-        logger.error(`${moduleName} order update error: ${JSON.stringify(err)}`);
-        return;
+    if (!_order) {
+        logger.error(`${moduleName} order to update not found id: ${id}`);
+        throw new AppError(`Order ${id} not found!`, 404, true);
     }
+
+    logger.debug(`${moduleName} updated order with id ${id}: ${JSON.stringify(order)}`);
+    return {message: `Order ${id} successfully updated!`};
 };
 
 exports.updateStatus = async (id, status) => {
-    try {
-        const order = await Order.update({
-            status: status,
-        }, {
-            where: {
-                id: id
-            }
-        });
-
-        if (!order) {
-            logger.error(`${moduleName} order to update not found id: ${id}`);
-            return;
+    const order = await Order.update({
+        status: status,
+    }, {
+        where: {
+            id: id
         }
+    });
 
-        logger.info(`${moduleName} updated order status with id ${id}: ${JSON.stringify(order)}`);
-        return order.get({ plain: true });
-
-    } catch (err) {
-        logger.error(`${moduleName} order update status error: ${JSON.stringify(err)}`);
-        return;
+    if (order[0] === 0) {
+        logger.error(`${moduleName} order to update not found id: ${id}`);
+        throw new AppError(`Product ${id} not found!`, 404, true);
     }
+
+    logger.debug(`${moduleName} updated order status with id ${id}: ${JSON.stringify(order)}`);
+    return {message: `Order ${id} status successfully updated! New status: ${status}`};
 };
 
 exports.findById = async (id) => {
-    try {
-        const order = await Order.findByPk(id, {
-            include: [{
-                model: OrderItem,
-                as: 'orderItems',
-                attributes: ['id', 'name', 'totalPrice', 'quantity']
-            },
+    const order = await Order.findByPk(id, {
+        include: [{
+            model: OrderItem,
+            as: 'orderItems',
+            attributes: ['id', 'name', 'totalPrice', 'quantity']
+        },
             {
                 model: ContactInfo,
                 as: 'contactInfo',
-                attributes: ['id', 'name', 'address', 'email', 'city', 'zip'] 
+                attributes: ['id', 'name', 'address', 'email', 'city', 'zip']
             }
         ],
-            raw: true,
-            nested: true,
-        });
+        raw: true,
+        nested: true,
+    });
 
-        if (!order) {
-            logger.info(`${moduleName} order ${id} not present in db`);
-            return;
-        }
-
-        logger.info(`${moduleName} retrieved order by id: ${id} | ${JSON.stringify(order)}`);
-        return order.get({ plain: true });
-
-    } catch (err) {
-        logger.error(`${moduleName} unexpected error on find order by id ${JSON.stringify(err)}`);
-        return;
+    if (!order) {
+        logger.info(`${moduleName} order ${id} not present in db`);
+        throw new AppError(`Order ${id} not found!`, 404, true);
     }
+
+    logger.debug(`${moduleName} retrieved order by id: ${id} | ${JSON.stringify(order)}`);
+    return order.get({plain: true});
+
 };
 
 exports.findAllByUserId = async (user) => {
-    try {
-        const orders = await Order.findAll({
-            where: {
-                user: user
-            },
-            include: [{
-                model: OrderItem,
-                as: 'orderItems',
-                attributes: ['id', 'name', 'totalPrice', 'quantity']
-            },
+    const orders = await Order.findAll({
+        where: {
+            user: user
+        },
+        include: [{
+            model: OrderItem,
+            as: 'orderItems',
+            attributes: ['id', 'name', 'totalPrice', 'quantity']
+        },
             {
                 model: ContactInfo,
                 as: 'contactInfo',
-                attributes: ['id', 'name', 'address', 'email', 'city', 'zip'] 
+                attributes: ['id', 'name', 'address', 'email', 'city', 'zip']
             }
         ],
-            raw: true,
-            nested: true,
-        });
+        raw: true,
+        nested: true,
+    });
 
-        if (!orders) {
-            logger.info(`${moduleName} order ${id} not present in db`);
-            return;
-        }
-
-        logger.info(`${moduleName} retrieved orders by user: ${user}`);
-        const converted = orders.map(order => order.get({ plain: true }));
-        return converted;
-
-    } catch (err) {
-        logger.error(`${moduleName} unexpected error on find order by id ${JSON.stringify(err)}`);
-        return;
+    if (!orders || orders.length === 0) {
+        logger.info(`${moduleName} Orders belonging to ${user} not present in db`);
+        throw new AppError(`Orders belonging to User ${user} not found!`, 404, true);
     }
+
+    logger.debug(`${moduleName} retrieved orders by user: ${user}`);
+    return orders.map(order => order.get({plain: true}));
+
 };
 
 exports.deleteById = async (id) => {
-    try {
         const deletedOrder = await Order.destroy({
             where: {
                 id: id
@@ -210,14 +168,9 @@ exports.deleteById = async (id) => {
 
         if (deletedOrder !== 1) {
             logger.info(`${moduleName} order and orderItems to delete not found id: ${id}`);
-            return;
+            throw new AppError(`Order ${id} not found!`, 404, true);
         }
 
-        logger.info(`${moduleName} delete order success, id: ${id}`);
-        return true;
-
-    } catch (err) {
-        logger.error(`${moduleName} unexpected error on delete order: ${JSON.stringify(err)}`);
-        return;
-    }
+        logger.debug(`${moduleName} delete order success, id: ${id}`);
+        return {message: `Order ${id} successfully deleted!`};
 };

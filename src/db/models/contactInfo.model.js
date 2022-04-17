@@ -5,14 +5,15 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: {
                 notEmpty: true,
+                msg: 'Name cannot be empty!'
             },
         },
         address: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.STRING,
             allowNull: false,
             validate: {
-                isInt: true,
                 notEmpty: true,
+                msg: 'Address cannot be empty!'
             },
         },
         email: {
@@ -20,6 +21,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: {
                 notEmpty: true,
+                msg: 'Email cannot be empty!'
             },
         },
         city: {
@@ -27,6 +29,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: {
                 notEmpty: true,
+                msg: 'City cannot be empty!'
             },
         },
         zip: {
@@ -34,6 +37,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: {
                 notEmpty: true,
+                msg: 'Zip cannot be empty!'
             },
         },
     });

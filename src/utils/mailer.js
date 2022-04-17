@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const logger = require('./logger');
+const {AppError} = require("../error");
 
 const moduleName = 'sendEmail.js -';
 
@@ -26,6 +27,7 @@ const sendEmail = async (email, subject, html) => {
     })
     .catch((err) => {
         logger.error(`${moduleName} subject: ${subject} email unexpected error ${JSON.stringify(err)}`);
+        return new AppError(`Could not send mail to user!`, 500, true);
     });
 };
 

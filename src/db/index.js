@@ -2,6 +2,7 @@ const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize(process.env.PSQL_DB, process.env.PSQL_USER, process.env.PSQL_PW, {
     host: process.env.PSQL_HOST,
+    port: process.env.PSQL_PORT,
     dialect: 'postgres',
     operatorsAliases: 0,
 
@@ -22,20 +23,14 @@ db.contactInfo = require('./models/contactInfo.model')(sequelize, Sequelize);
 
 db.sequelize = sequelize;
 
-db.order.hasMany(db.product, {
-    as: 'orderItems',
-});
 
-const OrderItemAssoc = db.orderItem.belongsTo(db.order, {
+const OrderItemAssoc = db.order.hasMany(db.orderItem, {
     foreignKey: 'orderId',
     as: 'orderItems'
 });
 
-db.order.hasMany(db.contactInfo, {
-    as: 'contactInfo'
-});
 
-const ContactInfoAssoc = db.contactInfo.belongsTo(db.order, {
+const ContactInfoAssoc = db.order.hasOne(db.contactInfo, {
     foreignKey: 'orderId',
     as: 'contactInfo'
 });

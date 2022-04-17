@@ -142,5 +142,5 @@ const generateJWT = (user) => {
             }
             resolve(token);
           });
-    })
-}
+    });
+};

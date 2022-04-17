@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             validate: {
                 notEmpty: true,
+                msg: 'Name cannot be empty!'
             },
         },
         price: {
@@ -13,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
             validate: {
                 isInt: true,
                 notEmpty: true,
+                msg: 'Price cannot be empty / Must be a number!'
             },
         },
         quantity: {
@@ -21,11 +23,16 @@ module.exports = (sequelize, DataTypes) => {
             validate: {
                 isInt: true,
                 notEmpty: true,
+                msg: 'Quantity cannot be empty / Must be a number!'
             },
         },
         productId: {
-            type: DataTypes.BIGINT,
+            type: DataTypes.INTEGER,
             allowNull: true,
+            validate: {
+                isInt: true,
+                msg: 'Product Id must be a number!'
+            }
         },
     });
 };

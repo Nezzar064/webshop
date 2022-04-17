@@ -1,11 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
-// const db = require('./src/db/index');
+const db = require('./src/db/index');
 
 
 const app = express();
-//db.sequelize.sync();
+db.sequelize.sync();
 
 let corsOptions = {
     origin: ''
@@ -23,15 +23,19 @@ db.sequelize.sync({ force: true }).then(() => {
 });
 */
 
-// IMPLEMENT RATE LIMITER PLEASE
-
-
 app.use(cors(corsOptions));
 
-// JSON content type
+// content types
 app.use(express.json());
-
 app.use(express.urlencoded({extended: true}));
+
+// IMPLEMENT RATE LIMITER PLEASE
+
+// Routes
+require('./src/routes/order.routes')(app);
+require('./src/routes/product.routes')(app);
+require('./src/routes/orderItem.routes')(app);
+require('./src/routes/contactInfo.routes')(app);
 
 // set port
 const PORT = process.env.RESOURCE_PORT || 8080;

@@ -28,14 +28,14 @@ const initial = (roles) => {
     });
 };
 
-const initDb = async () => {
+const initDb = () => {
     try {
         const options = {
             useNewUrlParser: true,
             useUnifiedTopology: true
         };
 
-        await mongoose.connect(`mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`, options);
+        mongoose.connect(`mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DB}`, options);
 
         logger.info(`${moduleName} Database successfully initialized`);
         initial(roles);
