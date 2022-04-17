@@ -1,5 +1,8 @@
-const logger = require('../utils/logger');
+const {logger} = require('../helpers/log');
 const {ValidationError} = require("sequelize");
+const {TokenExpiredError, JsonWebTokenError} = require("jsonwebtoken");
+
+const moduleName = 'errorHandler.js -';
 
 module.exports = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
@@ -22,8 +25,19 @@ const handleErr = (err, res, production) => {
         });
         return res.status(err.statusCode).json(errors);
     }
+    else if (err instanceof TokenExpiredError) {
+        logger.error(`${moduleName} access token is expired`);
+        res.status(401).json({ message: 'Access token was expired - Unauthorized!' });
+        return;
+    }
+    else if (err instanceof JsonWebTokenError) {
+        logger.error(`${moduleName} access token not valid`);
+        res.status(401).json({ message: 'Access token not valid - Unauthorized!' });
+        return;
+    }
     if (!production) {
-        logger.error(`Error Handler: ${JSON.stringify({status: err.status, error: err, message: err.message})}`);
+        logger.error(`${moduleName} ${JSON.stringify({status: err.status, error: err, message: err.message})}`);
+        handleNotOperationalErr(err, res);
         return res.status(err.statusCode).json({
             status: err.status,
             error: err,
@@ -31,8 +45,16 @@ const handleErr = (err, res, production) => {
             stack: err.stack,
         });
     }
+    handleNotOperationalErr(err, res);
     return res.status(err.statusCode).send({
         status: err.status,
         message: err.message,
     });
+};
+
+const handleNotOperationalErr = (err, res) => {
+    if (!err.isOperational) {
+        logger.error(`${moduleName} Fatal error occurred, restarting... ${JSON.stringify(err)}`);
+        return process.exit(1);
+    }
 };

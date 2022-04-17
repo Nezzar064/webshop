@@ -2,11 +2,11 @@
   "name": "webshop",
   "version": "1.0.0",
   "description": "webshop",
-  "main": "server.js",
+  "main": "src/server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon -r dotenv/config server.js",
-    "auth": "nodemon -r dotenv/config auth/auth.js"
+    "start": "nodemon -r dotenv/config src/server.js",
+    "auth": "nodemon -r dotenv/config src/auth/auth.js"
   },
   "author": "nezzar064",
   "license": "ISC",
@@ -15,6 +15,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.0.0",
     "express": "^4.17.3",
+    "express-rate-limit": "^6.3.0",
     "joi": "^17.6.0",
     "jshint": "^2.13.4",
     "jsonwebtoken": "^8.5.1",
