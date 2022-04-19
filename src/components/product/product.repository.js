@@ -71,7 +71,7 @@ exports.findById = async (id) => {
     return product.get({plain: true});
 };
 
-exports.updateStock = async (ids, itemsForUpdate, transaction) => {
+exports.updateStockOnCreateOrder = async (ids, itemsForUpdate, transaction) => {
     const productStocks = await Product.findAll({
         attributes: ['id', 'stock'],
         where: {
@@ -81,13 +81,13 @@ exports.updateStock = async (ids, itemsForUpdate, transaction) => {
 
     if (!productStocks || productStocks.length === 0) {
         logger.error(`${moduleName} failed to fetch products on update product stock`);
-        throw new AppError(`Failed to fetch products during update stock!`, 404, true);
+        return false;
     }
 
     const updates = [];
 
     productStocks.forEach(product => {
-        itemsForUpdate.forEach(item => {
+        itemsForUpdate.forEach(async (item) => {
             if (product.id !== item.productId) return;
             product.stock -= item.quantity;
 
@@ -102,9 +102,9 @@ exports.updateStock = async (ids, itemsForUpdate, transaction) => {
         });
     });
 
-    const updated = await Promise.all(updates);
+    const updated = await Promise.all(updates).catch(async () => { return null;});
 
-    if (!updated || updated[0] === undefined) {
+    if (!updated || updated.length === 0) {
         logger.error(`${moduleName} failed to update product stock`);
         return false;
     }
@@ -113,6 +113,24 @@ exports.updateStock = async (ids, itemsForUpdate, transaction) => {
 
     // product.service checks for this return
     return true;
+};
+
+exports.updateStock = async (id, stock) => {
+    const product = await Product.update({
+        stock: stock,
+    }, {
+        where: {
+            id: id
+        }
+    });
+
+    if (product[0] === 0) {
+        logger.error(`${moduleName} product to update stock not found id: ${id}`);
+        throw new AppError(`Product ${id} not found!`, 404, true);
+    }
+
+    logger.debug(`${moduleName} updated product stock with id ${id}: ${JSON.stringify(product)}`);
+    return {message: `Product ${id} stock successfully updated! New stock: ${stock}`};
 };
 
 exports.delete = async (id) => {

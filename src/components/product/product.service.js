@@ -1,11 +1,12 @@
 const productRepo = require('./product.repository');
+const {AppError} = require("../../error");
 
-exports.updateStock = async (items, transaction) => {
+exports.updateStockOnCreateOrder = async (items, transaction) => {
     const ids = items.map(item => {
         return item.productId;
     });
 
-    const updated = await productRepo.updateStock(ids, items, transaction);
+    const updated = await productRepo.updateStockOnCreateOrder(ids, items, transaction);
 
     if (!updated) {
         return;
@@ -13,6 +14,15 @@ exports.updateStock = async (items, transaction) => {
 
     // Order service runs a check on this
     return true;
+};
+
+exports.updateStock = async (id, stock) => {
+
+    if (typeof stock !== "number") {
+        throw new AppError(`Failed to update stock - invalid data! ${stock}`, 500, true);
+    }
+
+    return await productRepo.updateStock(id, stock);
 };
 
 exports.createProduct = async (product) => {

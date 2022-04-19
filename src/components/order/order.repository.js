@@ -8,7 +8,7 @@ const moduleName = 'order.repository.js -';
 
 exports.create = async (order, transaction) => {
     const _order = await Order.create({
-        date: order.date,
+        dateTime: order.dateTime,
         totalPrice: order.totalPrice,
         user: order.user,
         orderItems: order.orderItems,
@@ -26,6 +26,7 @@ exports.create = async (order, transaction) => {
 
     if (!_order) {
         logger.info(`${moduleName} create order no response from db`);
+        await transaction.rollback();
         return;
     }
 
@@ -37,7 +38,7 @@ exports.findAll = async () => {
         include: [{
             model: OrderItem,
             as: 'orderItems',
-            attributes: ['id', 'name', 'totalPrice', 'quantity']
+            attributes: ['id', 'name', 'price', 'quantity']
         },
             {
                 model: ContactInfo,
@@ -45,7 +46,6 @@ exports.findAll = async () => {
                 attributes: ['id', 'name', 'address', 'email', 'city', 'zip']
             }
         ],
-        raw: true,
         nested: true,
     });
 
@@ -54,16 +54,13 @@ exports.findAll = async () => {
         throw new AppError('No orders present in DB!', 404, true);
     }
 
-    return orders.map(order => order.get({plain: true}));
+    return orders;
 };
 
 exports.update = async (id, order) => {
     const _order = await Order.update({
         status: order.status,
-        name: order.name,
-        address: order.address,
-        email: order.email,
-        zip: order.zip,
+        dateTime: order.dateTime,
         totalPrice: order.totalPrice,
         user: order.user,
     }, {
@@ -92,7 +89,7 @@ exports.updateStatus = async (id, status) => {
 
     if (order[0] === 0) {
         logger.error(`${moduleName} order to update not found id: ${id}`);
-        throw new AppError(`Product ${id} not found!`, 404, true);
+        throw new AppError(`Order ${id} not found!`, 404, true);
     }
 
     logger.debug(`${moduleName} updated order status with id ${id}: ${JSON.stringify(order)}`);
@@ -112,7 +109,6 @@ exports.findById = async (id) => {
                 attributes: ['id', 'name', 'address', 'email', 'city', 'zip']
             }
         ],
-        raw: true,
         nested: true,
     });
 
@@ -122,7 +118,7 @@ exports.findById = async (id) => {
     }
 
     logger.debug(`${moduleName} retrieved order by id: ${id} | ${JSON.stringify(order)}`);
-    return order.get({plain: true});
+    return order;
 
 };
 
@@ -142,7 +138,6 @@ exports.findAllByUserId = async (user) => {
                 attributes: ['id', 'name', 'address', 'email', 'city', 'zip']
             }
         ],
-        raw: true,
         nested: true,
     });
 
@@ -152,7 +147,7 @@ exports.findAllByUserId = async (user) => {
     }
 
     logger.debug(`${moduleName} retrieved orders by user: ${user}`);
-    return orders.map(order => order.get({plain: true}));
+    return orders;
 
 };
 

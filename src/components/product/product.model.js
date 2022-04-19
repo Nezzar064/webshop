@@ -47,6 +47,10 @@ const Product = db.sequelize.define('products', {
                     args: true,
                     msg: 'Stock cannot be empty!'
                 },
+                min: {
+                    args: [0],
+                    msg: 'Stock cannot be below zero!',
+                },
             },
         },
         category: {

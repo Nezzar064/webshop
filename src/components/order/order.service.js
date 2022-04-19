@@ -50,13 +50,21 @@ const emailHtml = (order) => {
 
 exports.createOrder = async (body) => {
     const transaction = await db.sequelize.transaction();
+    const date = new Date();
+    let totalPrice = 0;
+    // Calculate total price of each order item and add to total price
+    const orderItems = body.orderItems.map(item => {
+        item.price = item.quantity * item.price;
+        totalPrice += item.price;
+        return item;
+    });
 
     // Default order status is pending, set by model
     const orderToCreate = {
         contactInfo: body.contactInfo,
-        date: new Date(),
-        totalPrice: calculateTotalPrice(body.orderItems),
-        orderItems: body.orderItems,
+        dateTime: `${date.toLocaleDateString()}, ${date.toLocaleTimeString()}`,
+        totalPrice: totalPrice,
+        orderItems: orderItems,
     };
 
     if (body.user) {
@@ -64,7 +72,7 @@ exports.createOrder = async (body) => {
     }
 
     const order = await orderRepo.create(orderToCreate, transaction);
-    const updatedStock = await productService.updateStock(order.orderItems, transaction);
+    const updatedStock = await productService.updateStockOnCreateOrder(order.orderItems, transaction);
 
     if (!order || !updatedStock) {
         await transaction.rollback();
@@ -77,15 +85,6 @@ exports.createOrder = async (body) => {
     await mailer.sendEmail(order.contactInfo.email, `Your order: ${order.id}`, emailHtml(order));
 
     return order;
-};
-
-// Helper func. used for calculating total price when placing an order
-const calculateTotalPrice = (orderItems) => {
-    let price = 0;
-    orderItems.forEach(item => {
-        price += item.quantity * item.price;
-    });
-    return price.toFixed(2);
 };
 
 exports.deleteOrder = async (id) => {

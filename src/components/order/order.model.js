@@ -11,8 +11,8 @@ const order = db.sequelize.define('orders', {
                 notEmpty: true,
             },
         },
-        date: {
-            type: db.dataTypes.DATE,
+        dateTime: {
+            type: db.dataTypes.STRING,
             allowNull: false,
             validate: {
                 notEmpty: true,

@@ -23,6 +23,7 @@ const handleErr = (err, res, production) => {
                 givenValue: error.value,
             };
         });
+        logger.error(`${moduleName} validation error ${JSON.stringify(errors)}`);
         return res.status(err.statusCode).json(errors);
     }
     else if (err instanceof TokenExpiredError) {
@@ -37,7 +38,7 @@ const handleErr = (err, res, production) => {
     }
     if (!production) {
         logger.error(`${moduleName} ${JSON.stringify({status: err.status, error: err, message: err.message})}`);
-        handleNotOperationalErr(err, res);
+        handleNotOperationalErr(err);
         return res.status(err.statusCode).json({
             status: err.status,
             error: err,
@@ -45,14 +46,14 @@ const handleErr = (err, res, production) => {
             stack: err.stack,
         });
     }
-    handleNotOperationalErr(err, res);
+    handleNotOperationalErr(err);
     return res.status(err.statusCode).send({
         status: err.status,
         message: err.message,
     });
 };
 
-const handleNotOperationalErr = (err, res) => {
+const handleNotOperationalErr = (err) => {
     if (!err.isOperational) {
         logger.error(`${moduleName} Fatal error occurred, restarting... ${JSON.stringify(err)}`);
         return process.exit(1);

@@ -24,6 +24,8 @@ module.exports = (app) => {
 
     router.put('/:id', asyncErrHandler(controller.updateProduct));
 
+    router.patch('/:id/:stock', asyncErrHandler(controller.updateStock));
+
     app.use('/api/resources/products', router);
 
     app.use(errorHandler);
