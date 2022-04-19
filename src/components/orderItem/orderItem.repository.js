@@ -35,21 +35,37 @@ exports.findById = async (id) => {
 
 };
 
-exports.delete = async (orderId, id) => {
+exports.findQuantityAndProductIdById = async (id) => {
+    const orderItem = await OrderItem.findByPk(id, {
+        attributes: ['id', 'quantity', 'productId']
+    });
+
+    if (!orderItem) {
+        logger.info(`${moduleName} orderItem ${id} not present in db`);
+        throw new AppError(`Order item ${id} not found!`, 404, true);
+    }
+
+    logger.debug(`${moduleName} retrieved orderItem quantity and product id by id: ${id} | ${JSON.stringify(orderItem)}`);
+    return orderItem.get({plain: true});
+
+};
+
+exports.delete = async (orderId, id, transaction) => {
     const deletedOrderItem = await OrderItem.destroy({
         where: {
             id: id,
             orderId: orderId,
-        }
+        },
+        transaction
     });
 
     if (deletedOrderItem !== 1) {
         logger.info(`${moduleName} orderItem to delete not found id: ${id}, orderId ${orderId}`);
-        throw new AppError(`Order item (id: ${id}, orderId: ${orderId}) not found!`, 404, true);
+        return false;
     }
 
     logger.debug(`${moduleName} delete orderItem by orderId success, id: ${id}, orderId ${orderId}`);
-    return {message: `Order item ${id} successfully deleted!`};
+    return true;
 };
 
 

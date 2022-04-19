@@ -5,6 +5,13 @@ const {AppError} = require("../../error");
 const moduleName = 'orderItem.controller.js -';
 
 exports.deleteOrderItem = async (req, res, next) => {
+
+    if (req.params.status.toUpperCase() !== 'PENDING') {
+        return next(new AppError('Cannot remove order item due to order status!', 400, true));
+    } else if (req.params.status.toUpperCase() !== 'PENDING' && !req.roles.includes('ADMIN') || !req.roles.includes('MODERATOR')) {
+        return next(new AppError('Cannot remove order item due to order status and missing roles!', 400, true));
+    }
+
     const deleted = await orderItemService.delete(req.params.orderId, req.params.id);
 
     if (!deleted) {

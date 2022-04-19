@@ -41,6 +41,10 @@ exports.findById = async (id) => {
     return await productRepo.findById(id);
 };
 
+exports.updateStockOnDeleteOrderItem = async (id, quantity, transaction) => {
+    return await productRepo.updateStockOnDeleteOrderItem(id, quantity, transaction);
+};
+
 exports.delete = async (id) => {
     return await productRepo.delete(id);
 };

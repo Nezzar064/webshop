@@ -50,7 +50,7 @@ exports.update = async (id, product) => {
         }
     });
 
-    if (_product[0] === 0) {
+    if (!_product || _product[0] === 0) {
         logger.error(`${moduleName} product to update not found id: ${id} / db error`);
         throw new AppError(`Product ${id} not found!`, 404, true);
     }
@@ -69,6 +69,36 @@ exports.findById = async (id) => {
 
     logger.debug(`${moduleName} retrieved product by id: ${id} | ${JSON.stringify(product)}`);
     return product.get({plain: true});
+};
+
+exports.updateStockOnDeleteOrderItem = async (id, quantity, transaction) => {
+    const product = await Product.findByPk(id, {
+        attributes: ['id', 'stock']
+    });
+
+    if (!product) {
+        logger.error(`${moduleName} product ${id} not present in db / db error`);
+        return false;
+    }
+
+    let newStock = product.stock += quantity;
+
+    const updated = await Product.update({
+        stock: newStock,
+    }, {
+        where: {
+            id: id
+        },
+        transaction
+    });
+
+    if (!updated || updated[0] === 0) {
+        logger.error(`${moduleName} product to update stock not found id: ${id}`);
+        return false;
+    }
+
+    logger.debug(`${moduleName} retrieved product stock by id: ${id} | ${JSON.stringify(product)}`);
+    return true;
 };
 
 exports.updateStockOnCreateOrder = async (ids, itemsForUpdate, transaction) => {
@@ -124,7 +154,7 @@ exports.updateStock = async (id, stock) => {
         }
     });
 
-    if (product[0] === 0) {
+    if (!product || product[0] === 0) {
         logger.error(`${moduleName} product to update stock not found id: ${id}`);
         throw new AppError(`Product ${id} not found!`, 404, true);
     }
