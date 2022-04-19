@@ -1,7 +1,14 @@
 const router = require('express').Router();
 const { errorHandler, asyncErrHandler } = require('../../../error');
 const controller = require("./password.controller");
-const apiLimiter = require('../../middlewares/rateLimiter');
+const rateLimit = require("express-rate-limit");
+
+const apiLimiter = rateLimit({
+    windowMs: 30 * 60 * 1000, // 15 minutes
+    max: 1, // 100 requests per 30 minutes
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
 
 module.exports = (app) => {
     app.use(apiLimiter);
@@ -14,7 +21,8 @@ module.exports = (app) => {
     });
 
     router.post('/pw-reset', asyncErrHandler(controller.pwResetEmailGen));
-    router.post('/pw-reset/:id/:token', asyncErrHandler(controller.pwReset));
+    router.post('/pw-reset/verify/:token', asyncErrHandler(controller.verifyPwResetForm));
+    router.post('/pw-reset/:token', asyncErrHandler(controller.pwReset));
 
     app.use('/api/auth', router);
 
