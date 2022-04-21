@@ -21,10 +21,10 @@ module.exports = (app) => {
         next();
     });
 
-    router.post('/pw-reset', asyncErrHandler(verifyToken), asyncErrHandler(controller.pwReset));
+    router.put('/pw-reset', asyncErrHandler(verifyToken), asyncErrHandler(controller.pwReset));
     router.post('/forgot-pw', asyncErrHandler(controller.forgotPwEmailGen));
-    router.post('/forgot-pw/verify/:token', asyncErrHandler(controller.verifyForgotPwForm));
-    router.post('/forgot-pw/:token', asyncErrHandler(controller.forgotPwReset));
+    router.get('/forgot-pw/verify/:token', asyncErrHandler(controller.verifyForgotPwForm));
+    router.put('/forgot-pw/:token', asyncErrHandler(controller.forgotPwReset));
 
     app.use('/api/auth', router);
 
