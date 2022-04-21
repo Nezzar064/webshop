@@ -1,8 +1,8 @@
 const winston = require('winston');
 
+
 module.exports.logger = winston.createLogger({
     format: winston.format.json(),
-    defaultMeta: { service: 'user-service' },
     transports: [
         new winston.transports.Console({
             format: winston.format.simple(),
@@ -10,10 +10,10 @@ module.exports.logger = winston.createLogger({
         }),
         /*
         new winston.transports.File({
-          filename: '../../../logs/resource/server.log',
+          filename: '../../../logs/auth/auth.log',
           format: winston.format.simple(),
           level: 'info'
-        }),
+        })
       */
     ],
 });
@@ -27,7 +27,7 @@ module.exports.mail_logger = winston.createLogger({
         }),
         /*
         new winston.transports.File({
-          filename: '../../../logs/resource/mailer.log',
+          filename: '../../../logs/auth/mailer.log',
           format: winston.format.simple(),
           level: 'info'
         })

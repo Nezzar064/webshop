@@ -5,8 +5,8 @@ const fs = require('fs');
 const User = require('./user.model');
 const Role = require('./role.model');
 const RefreshToken = require('./refreshToken.model');
-const {auth_logger: logger} = require('../../../helpers/log');
-const {AppError} = require("../../../error");
+const {logger} = require('../../helpers/log');
+const {AppError} = require("../../error");
 const key = fs.readFileSync('private-key.pem');
 
 const moduleName = 'auth.controller.js';
@@ -94,6 +94,19 @@ exports.signIn = async (req, res, next) => {
     });
 };
 
+exports.userInfo = async (req, res, next) => {
+
+    const user = await User.findById(req.params.id).select('_id, username, email, roles').exec();
+
+    if (!user) {
+        logger.error(`${moduleName} User by id details not found`);
+        return next(AppError('User details could not found!', 404, true));
+    }
+
+    logger.info(`${moduleName} Retrieved user details for user: ${req.params.id}`);
+    res.status(200).send(user);
+};
+
 exports.refreshToken = async (req, res, next) => {
 
     if (!Object.keys(req.body).length) {
@@ -101,46 +114,46 @@ exports.refreshToken = async (req, res, next) => {
         return next(new AppError('Please provide a token!', 403, true));
     }
 
-        const {refreshToken: requestToken} = req.body;
+    const {refreshToken: requestToken} = req.body;
 
-        const refreshToken = await RefreshToken.findOne({token: requestToken}).exec();
-        if (!refreshToken) {
-            logger.error(`${moduleName} Refresh Token not present in database`);
-            return next(new AppError('Refresh token could not be found!', 403, true));
-        }
+    const refreshToken = await RefreshToken.findOne({token: requestToken}).exec();
+    if (!refreshToken) {
+        logger.error(`${moduleName} Refresh Token not present in database`);
+        return next(new AppError('Refresh token could not be found!', 403, true));
+    }
 
-        // Verify expiry, if expired, remove it and prompt for new sign-in
-        if (RefreshToken.verifyRtExpiration(refreshToken)) {
-            logger.info(`${moduleName} Refresh Token is expired, requested for new login`);
+    // Verify expiry, if expired, remove it and prompt for new sign-in
+    if (RefreshToken.verifyRtExpiration(refreshToken)) {
+        logger.info(`${moduleName} Refresh Token is expired, requested for new login`);
 
-            await RefreshToken.findByIdAndRemove(refreshToken._id, {useFindAndModify: false});
-            return next(AppError('Refresh token is expired, please sign in again!', 403, true));
-        }
+        await RefreshToken.findByIdAndRemove(refreshToken._id, {useFindAndModify: false});
+        return next(AppError('Refresh token is expired, please sign in again!', 403, true));
+    }
 
-        const user = await User.findById(refreshToken.user._id).exec();
-        if (!user) {
-            logger.error(`${moduleName} User representing refresh token not found`);
-            return next(AppError('User representing refresh token not found!', 403, true));
-        }
+    const user = await User.findById(refreshToken.user._id).exec();
+    if (!user) {
+        logger.error(`${moduleName} User representing refresh token not found`);
+        return next(AppError('User representing refresh token not found!', 403, true));
+    }
 
-        // Generate new access token
-        let _accessToken = await generateJWT(user, next);
+    // Generate new access token
+    let _accessToken = await generateJWT(user, next);
 
-        return res.status(200).send({
-            accessToken: _accessToken,
-            refreshToken: refreshToken.token,
-        });
+    return res.status(200).send({
+        accessToken: _accessToken,
+        refreshToken: refreshToken.token,
+    });
 };
 
 // Utilized instead of duplicate code
 const generateJWT = (user, next) => {
-    return new Promise((resolve, reject) => {
-        jwt.sign({id: user.id, roles: user.roles}, {
+    return new Promise((resolve) => {
+        jwt.sign({id: user._id, roles: user.roles}, {
             key: key,
             passphrase: process.env.PRIVATE_KEY_PW
         }, {algorithm: 'RS256'}, function (err, token) {
             if (err) {
-                throw new AppError(err.message, 500, true);
+                next(new AppError(err.message, 500, true));
             }
             resolve(token);
         });

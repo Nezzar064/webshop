@@ -1,6 +1,6 @@
 const Token = require('./pwToken.model');
-const controller = require('./password.controller');
-const routes = require('./pwReset.routes');
+const controller = require('./passwordReset.controller');
+const routes = require('./passwordReset.routes');
 
 module.exports = {
     controller,

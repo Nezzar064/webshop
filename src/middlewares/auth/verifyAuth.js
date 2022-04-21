@@ -6,7 +6,7 @@ const {logger} = require('../../helpers/log');
 const {AppError} = require("../../error");
 const publicKey = fs.readFileSync('public-key.pem');
 
-const moduleName = 'jwt.js -';
+const moduleName = 'verifyAuth.js -';
 
 // JWT Verification
 module.exports.verifyToken = (includeRoles) => {
@@ -30,6 +30,8 @@ module.exports.verifyToken = (includeRoles) => {
         if (includeRoles) {
             req.roles = decoded.roles;
         }
+        
+        req.userId = decoded._id;
 
         logger.info(`${moduleName} Token successfully verified, invoking guards`);
         return next();

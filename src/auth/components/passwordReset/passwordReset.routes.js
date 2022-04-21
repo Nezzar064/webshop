@@ -1,6 +1,7 @@
 const router = require('express').Router();
-const { errorHandler, asyncErrHandler } = require('../../../error');
-const controller = require("./password.controller");
+const {verifyToken} = require('../../middlewares');
+const { errorHandler, asyncErrHandler } = require('../../error');
+const controller = require("./passwordReset.controller");
 const rateLimit = require("express-rate-limit");
 
 const apiLimiter = rateLimit({
@@ -20,9 +21,10 @@ module.exports = (app) => {
         next();
     });
 
-    router.post('/pw-reset', asyncErrHandler(controller.pwResetEmailGen));
-    router.post('/pw-reset/verify/:token', asyncErrHandler(controller.verifyPwResetForm));
-    router.post('/pw-reset/:token', asyncErrHandler(controller.pwReset));
+    router.post('/pw-reset', asyncErrHandler(verifyToken), asyncErrHandler(controller.pwReset));
+    router.post('/forgot-pw', asyncErrHandler(controller.forgotPwEmailGen));
+    router.post('/forgot-pw/verify/:token', asyncErrHandler(controller.verifyForgotPwForm));
+    router.post('/forgot-pw/:token', asyncErrHandler(controller.forgotPwReset));
 
     app.use('/api/auth', router);
 
