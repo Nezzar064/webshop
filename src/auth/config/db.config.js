@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const {auth_logger: logger} = require('../../helpers/log');
+const {logger} = require('../helpers/log');
 const {Role} = require('../components/authentication');
 
 const moduleName = 'db/db.config.js -';

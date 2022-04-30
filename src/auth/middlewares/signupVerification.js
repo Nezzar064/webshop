@@ -1,7 +1,7 @@
 const db = require('../config/db.config');
 const User = require('../components/authentication/user.model');
-const {auth_logger: logger} = require('../../helpers/log');
-const {AppError} = require("../../error");
+const {logger} = require('../helpers/log');
+const {AppError} = require("../error");
 
 const moduleName = 'signupVerification.js -';
 

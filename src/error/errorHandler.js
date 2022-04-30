@@ -24,7 +24,7 @@ const handleErr = (err, res, production) => {
             };
         });
         logger.error(`${moduleName} validation error ${JSON.stringify(errors)}`);
-        return res.status(err.statusCode).json(errors);
+        return res.status(500).json(errors);
     }
     else if (err instanceof TokenExpiredError) {
         logger.error(`${moduleName} access token is expired`);
@@ -43,7 +43,6 @@ const handleErr = (err, res, production) => {
             status: err.status,
             error: err,
             message: err.message,
-            stack: err.stack,
         });
     }
     handleNotOperationalErr(err);
