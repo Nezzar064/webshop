@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const User = require('../components/authentication/user.model');
+const {User} = require('../components/authentication');
 const {logger} = require('../helpers/log');
 const {AppError} = require("../error");
 

@@ -36,6 +36,11 @@ const handleErr = (err, res, production) => {
         res.status(401).json({ message: 'Access token not valid - Unauthorized!' });
         return;
     }
+    else if (err instanceof TypeError) {
+        logger.error(`${moduleName} type error ${err.message} ${err.stack}`);
+        res.status(500).json({ message: `${err.message}, ${err.stack}` });
+        return;
+    }
     if (!production) {
         logger.error(`${moduleName} ${JSON.stringify({status: err.status, error: err, message: err.message})}`);
         handleNotOperationalErr(err);

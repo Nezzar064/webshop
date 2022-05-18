@@ -31,16 +31,6 @@ const ContactInfo = db.sequelize.define('contactInfo', {
             },
         },
     },
-    phone: {
-        type: db.dataTypes.STRING,
-        allowNull: false,
-        validate: {
-            notEmpty: {
-                args: true,
-                msg: 'Phone number cannot be empty!'
-            },
-        },
-    },
     city: {
         type: db.dataTypes.STRING,
         allowNull: false,
